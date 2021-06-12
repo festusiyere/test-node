@@ -1,66 +1,98 @@
 
-import { Request, Response } from "express";
-
-const appError = require('./appError');
+import { NextFunction, Request, Response } from "express";
+import log from '../../logger'
+import appError from './appError';
 
 class GlobalError {
-    err:Error;
-    res:Response;
-    constructor(res :Response) {
-        this.err=new Error;
+    err: appError;
+    res: Response;
+    constructor(err: appError, res: Response) {
+        this.err = err;
         this.res = res;
     }
- handleDev = () => {
-    console.log(this.err)
-    return new appError('Your token is invalid', 401);
-};
-
-//handle error in test
- handleTest = () => {
-    console.log(this.err)
-    return new appError('Your token is invalid', 401);
-};
- handleProd = () => {
-    console.log(this.err)
-    return new appError('Your token is invalid', 401);
-};
-handleCastErrorDB = () => {
-    console.log(this.err)
-    return new appError('Your token is invalid', 401);
-};
-handleUniqueErrorDB = () => {
-    console.log(this.err)
-    return new appError('Your token is invalid', 401);
-};
-handleValidationErrorDB = () => {
-    // const errors = Object.values(this.err.errors).map((el) => el.message);
-    const message = 'zxzxz';
-    return new appError(message, 422);
-};
-handleJsonWebTokenErrorAuth = () => {  
-    console.log(this.err)
-    return new appError('Your token is invalid', 401);
-};
-handleTokenExpiredErrorAuth = () => {
-    console.log(this.err)
-    return new appError('Your token is Expired', 401);
-};
+    handleCastErrorDB = () => {
+        console.log('cast Error', this.err)
+        return this.res.status(500).json({
+            message: this.err.message
+        })
+    };
+    handleUniqueErrorDB = () => {
+        console.log('UniqeError', this.err)
+        return this.res.status(500).json({
+            message: this.err.message
+        })
+    };
+    handleValidationErrorDB = () => {
+        return this.res.status(422).json({
+            error: this.err.message
+        })
+    };
+    handleJsonWebTokenErrorAuth = () => {
+        console.log('Jwbwebtoken', this.err)
+        return this.res.status(500).json({
+            message: this.err.message
+        })
+    };
+    handleTokenExpiredErrorAuth = () => {
+        console.log('Uncaught Error', this.err)
+        return this.res.status(500).json({
+            message: this.err.message
+        })
+    };
+    handleUncaughtError = () => {
+        return this.res.status(500).json({
+            error: this.err.message
+        })
+    };
+    handleUnauthoziedErrorDB = () => {
+        const errStatus:number = this.err.statusCode || 401
+        return this.res.status(errStatus).json({
+            error: this.err.message
+        })
+    };
 }
 
-export  default function (res :Response) {
+export default function (err: appError, req: Request, res: Response, next: NextFunction) {
+    const handleError = new GlobalError(err, res)
+    /**
+     * 
+     * Sort Errors first By name
+     */
+    //log all errors
+    if (err.name == 'CastError') return handleError.handleCastErrorDB();
+    /**
+     * handle Unique DB Errors
+     */
+    if (err.name == '11000') return handleError.handleUniqueErrorDB();
+    /**
+     * Handle validation errors
+     */
+    if (err.name == 'ValidationError') return handleError.handleValidationErrorDB();
+    /**
+     * handle JasonWebToken Error
+     */
+    if (err.name == 'JsonWebTokenError') return handleError.handleJsonWebTokenErrorAuth();
+    /**
+     * Handle expired token
+     */
+    if (err.name == 'TokenExpiredError') return handleError.handleTokenExpiredErrorAuth();
+    /**
+     * Handle any other error
+     */
+    /****
+     * 
+     * Sort Error By Code
+     * 
+     * 
+     */
+     if (err.statusCode == 401 ||err.statusCode == 403 ) return handleError.handleUnauthoziedErrorDB();
+    /**
+     * handle JasonWebToken Error
+     */
+     if (err.statusCode == 422) return handleError.handleValidationErrorDB();
+    /**
+     * handle JasonWebToken Error
+     */
+    return handleError.handleUncaughtError();
 
-    const dError = new GlobalError(res)
-    if (process.env.NODE_ENV === 'production') {
-        let error = new  Error;
-        if (error.name == 'CastError') error = dError.handleCastErrorDB();
-        if (error.name == '11000') error = dError.handleUniqueErrorDB();
-        if (error.name == 'ValidationError') error = dError.handleValidationErrorDB();
-        if (error.name == 'JsonWebTokenError') error = dError.handleJsonWebTokenErrorAuth();
-        if (error.name == 'TokenExpiredError') error = dError.handleTokenExpiredErrorAuth();
-        dError.handleProd();
-    } else if (process.env.NODE_ENV === 'development') {
-        dError.handleDev();
-    } else {
-        dError.handleTest();
-    }
 }

@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { nanoid } from "nanoid";
-import { UserDocument } from "../auth/user/user.model";
+import { UserDocument } from "../auth/auth.model";
 import { TicketDocument } from "../ticket/ticket.model";
 
 export interface CommentDocument extends mongoose.Document {

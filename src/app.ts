@@ -5,7 +5,8 @@ import mongoSanitize from "express-mongo-sanitize";
 import log from "./logger"; 
 import connect from "./db/connect";
 import routes from "./routes";
-
+import {globalError, appError , } from '../src/utils/error';
+import * as rateLimiter from  '../src/middleware/rateLimiter';
 const app = express();
 
 //set access token from refres token
@@ -22,16 +23,18 @@ app.use(helmet());
 // https://www.npmjs.com/package/express-mongo-sanitize
 app.use(mongoSanitize());
 
-// NOTE apiCallsLimiter is to limit the number of call per certian time, to prevent spamming.
-// if (process.env.NODE_ENV === 'production') {
-//     app.use('/api/v1', , apiRoutes);
-// } else {
-//     app.use('/api/v1', apiRoutes);
-// }
+
 app.use(express.urlencoded({ extended: false }));
 
+//api entry point
 
-app.use('/api/v1',routes );
+//rate limiter limits the number of calls ade to the valid api route
+app.use('/api/v1', rateLimiter.app , routes );
 
-
+//undefined routes
+app.all("*", (req, res, next) => {
+    next(new appError(`Can't find ${req.originalUrl} on server !` , 404));
+  });
+app.use(globalError);
+//Global Error Handler
 export default app;

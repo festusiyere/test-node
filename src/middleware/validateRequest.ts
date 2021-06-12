@@ -1,24 +1,14 @@
-import { AnySchema } from "yup";
-import { Request, Response, NextFunction } from "express";
-import log from "../logger";
+import { AnySchema } from 'yup';
+import { Request, Response, NextFunction } from 'express';
+import asyncError from '../utils/error/asyncError';
 
-const validate = (schema: AnySchema) => async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    await schema.validate({
-      body: req.body,
-      query: req.query,
-      params: req.params,
-    });
-
-    return next();
-  } catch (e) {
-    log.error(e);
-    return res.status(400).send(e.errors);
-  }
-};
+const validate = (schema: AnySchema) => asyncError(async (req: Request, res: Response, next: NextFunction) => {
+        await schema.validate({
+            body: req.body,
+            query: req.query,
+            params: req.params
+        });
+        return next();
+      });
 
 export default validate;

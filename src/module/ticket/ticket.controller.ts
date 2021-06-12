@@ -1,107 +1,148 @@
-import { Request, Response } from "express";
-import { get } from "lodash";
-import {
-  createTicket,
-  findTicket,
-  findAndUpdate,
-  deleteTicket,
-  getStatTicket,
-  getMonthlyTicket,
-} from "./ticket.service";
-import PDF from '../../utils/print/pdf'
-import CSV from '../../utils/print/csv'
-export async function createTicketHandler(req: Request, res: Response) {
-  const userId = get(req, "user._id");
-  const body = req.body;
-  const ticket = await createTicket({ ...body, user: userId });
-  return res.send(ticket);
-}
-export async function getATicketHandler(req: Request, res: Response) {
-  const userId = get(req, "user._id");
-  const user = get(req, "user");
-  const _id = get(req, "params.ticketId");
-  const ticket = await findTicket({ _id });
-  if (!ticket) {
-    return res.sendStatus(404);
-  }
+import { Request, Response } from 'express';
+import asyncError from '../../utils/error/asyncError';
+import { get } from 'lodash';
+import { createTicket, findTicket, findAndUpdate, deleteTicket, getStatTicket, getMonthlyTicket } from './ticket.service';
+import PDF from '../../utils/print/pdf';
+import CSV from '../../utils/print/csv';
 
-  if (user.role === 'customer' && String(ticket.customer) !== userId) {
-    return res.sendStatus(401);
-  }
-  return res.send(ticket);
-}
-export async function updateTicketHandler(req: Request, res: Response) {
-  const userId = get(req, "user._id");
-  const _id = get(req, "params.ticketId");
-  const update = req.body;
-  const ticket = await findTicket({ _id : _id});
-  if (!ticket) {
-    return res.sendStatus(404);
-  }
+/**
+ * create Ticket
+ */
+export const create = asyncError(async (req: Request, res: Response) => {
+    const userId = get(req, 'user._id');
+    const body = req.body;
+    const ticket = await createTicket({ ...body, user: userId });
+    return res.status(200).json({message : ticket});
+});
+/**
+ *  Get All Ticket
+ */
+export const getAllTicket = asyncError(async (req: Request, res: Response) => {
+    const userId = get(req, 'user._id');
+    //
+    const user = get(req, 'user');
+    //
+    const _id = get(req, 'params.ticketId');
 
-  if (String(ticket.customer) !== userId) {
-    return res.sendStatus(401);
-  }
+    const ticket = await findTicket({ _id });
 
-  const updatedTicket = await findAndUpdate({ _id }, update, { new: true });
+    if (!ticket) return res.status(404).json({ message: 'No Record found' });
 
-  return res.send(updatedTicket);
-}
-export async function getTicketHandler(req: Request, res: Response) {
-  const ticketId = get(req, "params.ticketId");
-  const ticket = await findTicket({ ticketId });
+    //check to ensure customer an only view ticket they created
+    if (user.role === 'customer' && String(ticket.customer) !== userId) {
+        return res.sendStatus(401);
+    }
+    return res.status(200).json({data : ticket});
+});
+/**
+ *  Get Update
+ */
+export const update = asyncError(async (req: Request, res: Response) => {
+    //
+    const userId = get(req, 'user._id');
+    //
+    const _id = get(req, 'params.ticketId');
+    //
+    const update = req.body;
 
-  if (!ticket) {
-    return res.sendStatus(404);
-  }
+    const ticket = await findTicket({ _id: _id });
+    if (!ticket) {
+        return res.status(404).json({ message: 'No Record found' });
+    }
 
-  return res.send(ticket);
-}
+    const updatedTicket = await findAndUpdate({ _id }, update, { new: true });
 
-export async function deleteTicketHandler(req: Request, res: Response) {
-  const userId = get(req, "user._id");
-  const _id = get(req, "params.ticketId");
+    return res.status(200).json({data : updatedTicket});
+});
+/**
+ *  Get Ticket
+ */
+export const getTicket = asyncError(async (req: Request, res: Response) => {
+    const ticketId = get(req, 'params.ticketId');
 
-  const ticket = await findTicket({ _id });
+    const ticket = await findTicket({ _id : ticketId });
 
-  if (!ticket) {
-    return res.sendStatus(404);
-  }
+    if (!ticket) {
+        return res.status(404).json({ message: 'No Record found' });
+    }
 
-  await deleteTicket({ _id });
+    return res.status(200).json({data : ticket});
+});
+/**
+ *  Delete
+ */
+export const ticketDelete = asyncError(async (req: Request, res: Response) => {
+    console.log('xxx');
+    const userId = get(req, 'user._id');
+    const _id = get(req, 'params.ticketId');
 
-  return res.sendStatus(200);
-}
+    const ticket = await findTicket({ _id });
 
-export async function TicketStatistcHandler(req: Request, res: Response) {
-  const ticket = await getStatTicket(req, res);
-  return res.status(200).json({data:ticket});
-}
-export async function TicketUserHandler(req: Request, res: Response) {
-  const month = get(req, "params.month");
-  const user   =  get(req, "user");
-  let ticket;
-  if(user.role == 'customer'){
-    ticket = await findTicket({ customer : user._id });
-  }else{
-    ticket = await findTicket({ agent : user._id });
-  }
-  return res.status(200).json({data:ticket});
-}
-export async function TicketMonthlyHandler(req: Request, res: Response) {
-  const month = get(req, "params.month");
-  const ticket = await getMonthlyTicket(month);
-  return res.status(200).json({data:ticket});
-}
-export async function TicketPdfHandler(req: Request, res: Response) {
-  const month = get(req, "params.month");
-  const ticket = await getMonthlyTicket(month);
-  const ig = new PDF(res, ticket);
-  return ig.generate();
-}
-export async function TicketCsvHandler(req: Request, res: Response) {
-  const month = get(req, "params.month");
-  const ticket = await getMonthlyTicket(month);
-  const ig = new CSV(res, ticket);
-  return ig.generate();
-}
+    if (!ticket) {
+        return res.status(404).json({ message: 'No Record found' });
+    }
+
+    await deleteTicket({ _id });
+
+    return res.sendStatus(200);
+});
+/**
+ *  Get Statistic of the ticket for a period of time $start_date to $end_date
+ */
+export const rangeStatistic = asyncError(async (req: Request, res: Response) => {
+    const ticket = await getStatTicket(req, res);
+
+    return res.status(200).json({ data: ticket });
+});
+/**
+ *  Get by agent or  admin
+ */
+
+export const userTicket = asyncError(async (req: Request, res: Response) => {
+    const month = get(req, 'params.month');
+
+    const user = get(req, 'user');
+
+    let ticket;
+
+    if (user.role == 'customer') {
+        ticket = await findTicket({ customer: user._id });
+    } else {
+        ticket = await findTicket({ agent: user._id });
+    }
+    return res.status(200).json({ data: ticket });
+});
+/**
+ *  Get Montly sorted Ticket
+ */
+export const monthlyTicket = asyncError(async (req: Request, res: Response) => {
+    const month = get(req, 'params.month');
+
+    const ticket = await getMonthlyTicket(month);
+
+    return res.status(200).json({ data: ticket });
+});
+/**
+ *  PDF
+ */
+export const pdf = asyncError(async (req: Request, res: Response) => {
+    const month = get(req, 'params.month');
+
+    const ticket = await getMonthlyTicket(month);
+
+    const ig = new PDF(res, ticket);
+
+    return ig.generate();
+});
+/**
+ *  Get CSV
+ */
+export const csv = asyncError(async (req: Request, res: Response) => {
+    const month = get(req, 'params.month');
+
+    const ticket = await getMonthlyTicket(month);
+
+    const ig = new CSV(res, ticket);
+
+    return ig.generate();
+});
