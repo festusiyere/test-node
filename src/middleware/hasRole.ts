@@ -1,19 +1,17 @@
 import { get } from 'lodash';
 import { Request, Response, NextFunction } from 'express';
-import { appError } from '../utils/error';
 import { AnyRecord } from 'dns';
 
 const hasRole = (...roles: string[]) => {
-
     return (req: Request, res: Response, next: NextFunction) => {
-        
         const user = get(req, 'user');
+
+        const userId = get(req, 'user._id');
+
+
         if (!roles.includes(user.role)) {
-            console.log(user.role)
-            return next();
-            return next(new appError('Permission Denied', 419));
+            return res.status(403).json({ message: 'Permission Denied' });
         }
-        console.log('unauthenticated access attempt')
         next();
     };
 };

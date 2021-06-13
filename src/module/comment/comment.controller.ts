@@ -24,7 +24,7 @@ export const create = (async (req: Request, res: Response) => {
     return res.status(404).json({ message: 'Ticket Not Found' });
   }
   if (String(user.role) == 'customer' && ticket.status == 'pending') {
-    return res.status(400).json({ message: 'Ticket Still Pending' });
+    return res.status(403).json({ message: 'Ticket Still Pending' });
     //prevent customer from commenting on a pending ticket
   }
   if (!(String(user.role) == 'customer') && ticket.ticketComments.length < 1) {
@@ -32,7 +32,7 @@ export const create = (async (req: Request, res: Response) => {
     //set agent in chare of a ticket
   }
   if (ticket.status == 'close') {
-    return res.status(404).json({ message: 'Ticket Already Closed' });
+    return res.status(403).json({ message: 'Ticket Already Closed' });
     //prevent everyone  from commenting on a closed ticket
   }
   const body = req.body;
@@ -68,7 +68,7 @@ export const getComment = (async (req: Request, res: Response) => {
   const _id = get(req, "params.commentId");
 
   const comment = await findComment({ _id: _id });
-  
+
   if (!comment) {
     return res.status(404).json({ message: 'Comment Not Found' });
   }

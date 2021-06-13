@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "seed": "npm  ./src/seed.js",
     "start": "nodemon --config nodemon.json server.ts",
     "test:i": "cypress open -c trashAssetsBeforeRuns=false",
     "test:u": "jest  --verbose --rootDir=test"
