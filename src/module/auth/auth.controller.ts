@@ -4,30 +4,26 @@ import asyncError from '../../utils/error/asyncError';
 import { registerHandler, validatePassword, validateEmail, resetPasswordHandler, logoutHandler } from './auth.service';
 import { createSession, createAccessToken, findSessions, findUser } from './auth.service';
 import { sign, decode } from '../../utils/jwt.utils';
-import { appError } from '../../utils/error';
+import { AppError } from '../../utils/error';
 import { get } from 'lodash';
 import config from 'config';
-/**
- *
- *  Registration Controller
- *
- */
+
+// Register User method
 export const register = asyncError(async (req: Request, res: Response, next: NextFunction) => {
     const checkUser = await findUser({ email: req.body.email });
 
-    if (checkUser) return next(new appError(`${req.body.email} is already registerd`, 422));
+    if (checkUser) return next(new AppError(`${req.body.email} is already registerd`, 422));
     //check for email uniqueness
     const user = await registerHandler(req.body);
     //send user detail
     return res.status(201).json({ data: omit(user.toJSON(), 'password') });
 });
-/**
- * Login Controller
- */
+
+// Login User method
 export const login = asyncError(async (req: Request, res: Response, next: NextFunction) => {
     const user = await validatePassword(req.body);
 
-    if (!user) return next(new appError(`Invalid username or password`, 401));
+    if (!user) return next(new AppError(`Invalid username or password`, 401));
 
     // Create a session
     const session = await createSession(user._id, req.get('user-agent') || '');
@@ -42,13 +38,12 @@ export const login = asyncError(async (req: Request, res: Response, next: NextFu
     return res.status(200).json({ accessToken, refreshToken });
 });
 
-/**
- * Forget Password
- */
+
+// Forget Password method
 export const forgetPassword = asyncError(async (req: Request, res: Response, next: NextFunction) => {
     const user = await validateEmail(req.body);
 
-    if (!user) return next(new appError(`Invalid Email`, 401));
+    if (!user) return next(new AppError(`Invalid Email`, 401));
     //send user detail
     const session = await createSession(user._id, req.get('user-agent') || '');
 
@@ -58,29 +53,26 @@ export const forgetPassword = asyncError(async (req: Request, res: Response, nex
     // send refresh & access token back
     return res.status(200).json({ resetToken });
 });
-/**
- * Reset Password
- */
+
+// Reset Password method
 export const resetPassword = asyncError(async (req: Request, res: Response, next: NextFunction) => {
     const user = await resetPasswordHandler(req.params.resetToken, req.body);
 
-    if (!user) return next(new appError(`Token Invalid or Expired`, 401));
+    if (!user) return next(new AppError(`Token Invalid or Expired`, 401));
     // return success message after a sucesxfful reset
     return res.status(200).json({
         message: 'Password succesfully reset'
     });
 });
-/***
- * Currently logged in user
- */
+
+// Get current logged in user method
 export const loggedIn = asyncError(async (req: Request, res: Response) => {
     const user = get(req, 'user');
     //send user detail
     return res.status(200).json({ data: user });
 });
-/**
- * logout user
- */
+
+// Logout user method
 export const logout = asyncError(async (req: Request, res: Response) => {
     const sessionId = get(req, 'user.session');
 
@@ -88,9 +80,8 @@ export const logout = asyncError(async (req: Request, res: Response) => {
     //send user detail
     return res.status(200).json({ message: 'logout successful' });
 });
-/**
- * User section, active tokens etc
- */
+
+// Get Session method
 export const getUserSessionsHandler = asyncError(async (req: Request, res: Response) => {
     const userId = get(req, 'user._id');
 

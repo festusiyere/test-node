@@ -1,4 +1,4 @@
-import { object, string, ref } from 'yup';
+import { object, string } from 'yup';
 export const create = object({
     body: object({
         title: string().required('Title is required'),

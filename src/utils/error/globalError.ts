@@ -1,23 +1,20 @@
 
 import { NextFunction, Request, Response } from "express";
-import log from '../../logger'
-import appError from './appError';
+import AppError from './AppError';
 
 class GlobalError {
-    err: appError;
+    err: AppError;
     res: Response;
-    constructor(err: appError, res: Response) {
+    constructor(err: AppError, res: Response) {
         this.err = err;
         this.res = res;
     }
     handleCastErrorDB = () => {
-        console.log('cast Error', this.err)
         return this.res.status(500).json({
             message: this.err.message
         })
     };
     handleUniqueErrorDB = () => {
-        console.log('UniqeError', this.err)
         return this.res.status(500).json({
             message: this.err.message
         })
@@ -28,13 +25,11 @@ class GlobalError {
         })
     };
     handleJsonWebTokenErrorAuth = () => {
-        console.log('Jwbwebtoken', this.err)
         return this.res.status(500).json({
             message: this.err.message
         })
     };
     handleTokenExpiredErrorAuth = () => {
-        console.log('Uncaught Error', this.err)
         return this.res.status(500).json({
             message: this.err.message
         })
@@ -44,7 +39,7 @@ class GlobalError {
             error: this.err.message
         })
     };
-    handleUnauthoziedErrorDB = () => {
+    handleUnauthorizedErrorDB = () => {
         const errStatus:number = this.err.statusCode || 401
         return this.res.status(errStatus).json({
             error: this.err.message
@@ -52,7 +47,7 @@ class GlobalError {
     };
 }
 
-export default function (err: appError, req: Request, res: Response, next: NextFunction) {
+export default function (err: AppError, req: Request, res: Response, next: NextFunction) {
     const handleError = new GlobalError(err, res)
     /**
      * 
@@ -85,7 +80,7 @@ export default function (err: appError, req: Request, res: Response, next: NextF
      * 
      * 
      */
-     if (err.statusCode == 401 ||err.statusCode == 403 ) return handleError.handleUnauthoziedErrorDB();
+     if (err.statusCode == 401 ||err.statusCode == 403 ) return handleError.handleUnauthorizedErrorDB();
     /**
      * handle JasonWebToken Error
      */

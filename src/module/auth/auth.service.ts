@@ -23,26 +23,31 @@ export async function validatePassword({ email, password }: { email: UserDocumen
     //check if email exist
     if (!user) return false;
     const isValid = await user.comparePassword(password);
+
     // compare password
     if (!isValid) return false;
+
     //return user
-    return omit(user.toJSON(), "password");;
+    return omit(user.toJSON(), "password");
 }
 
 export async function validateEmail({ email }: { email: UserDocument['email'] }) {
     const user = await User.findOne({ email });
+
     //check if email exist
     if (!user) return false;
+
     //return user
     return user;
 }
 export async function resetPasswordHandler(resetToken: string, update: UpdateQuery<UserDocument>) {
     const { decoded, expired } = decode(resetToken);
 
-    if (expired) return false;
     //check for expired token
-    if (!decoded || !get(decoded, '_id')) return false;
+    if (expired) return false;
+
     //check for irregular token
+    if (!decoded || !get(decoded, '_id')) return false;
 
     const session = await Session.findById(get(decoded, '_id'));
 
@@ -50,15 +55,19 @@ export async function resetPasswordHandler(resetToken: string, update: UpdateQue
     if (!session || !session?.valid) return false;
 
     const user = await User.findOneAndUpdate({ _id: session.user }, update);
-    //check
+
+    //check for data
     if (!user) return false;
+
     //return user
     return user;
 }
 export async function findAndUpdate(query: FilterQuery<UserDocument>, update: UpdateQuery<UserDocument>) {
     const user = await User.findOneAndUpdate(query, update);
-    //check
+
+    //check for data
     if (!user) return false;
+
     //return user
     return user;
 }
@@ -76,11 +85,7 @@ export function createAccessToken({
     session: Omit<SessionDocument, 'password'> | LeanDocument<Omit<SessionDocument, 'password'>>;
 }) {
     // Build and return the new access token
-    // const accessToken = sign(
-    //     { ...user, session: session._id },
-    //     { expiresIn: config.get('accessTokenTtl') } // 15 minutes
-    // );
-  const accessToken = sign(
+    const accessToken = sign(
         { ...user, session: session._id },
         { expiresIn: config.get('accessTokenTtl') } // 15 minutes
     );

@@ -1,16 +1,14 @@
 var { Parser } = require('json2csv');
-import { Express, Request, Response } from "express";
-import { TicketDocument } from "../../module/ticket/ticket.model";
+import { Response } from "express";
 
-export default  class CSV {
-    ticket:Object;
-    res:Response;
-    constructor(res :Response, ticket : Object) {
+export default class CSV {
+    ticket: object;
+    res: Response;
+    constructor(res: Response, ticket: object) {
         this.ticket = ticket;
         this.res = res;
     }
     generate() {
-        console.log('xxxxxxewewewe');
         const fields = ['title', 'customer.name', 'agent.name', 'description'];
         try {
             const json2csvParser = new Parser({ fields });

@@ -1,8 +1,5 @@
-import { DocumentDefinition, FilterQuery,UpdateQuery, QueryOptions } from "mongoose";
-
+import { DocumentDefinition, FilterQuery, UpdateQuery, QueryOptions } from "mongoose";
 import User, { UserDocument } from "../auth/auth.model";
-
-import { appError } from '../../utils/error';
 
 export async function createUser(input: DocumentDefinition<UserDocument>) {
   try {
@@ -13,7 +10,7 @@ export async function createUser(input: DocumentDefinition<UserDocument>) {
 }
 
 export function findUser(query: FilterQuery<UserDocument>, options: QueryOptions = { lean: true }) {
-    return User.findOne(query, {}, options);
+  return User.findOne(query, {}, options);
 }
 
 export function findUsers(query: FilterQuery<UserDocument>, options: QueryOptions = { lean: true }) {
@@ -21,10 +18,9 @@ export function findUsers(query: FilterQuery<UserDocument>, options: QueryOption
 }
 
 export function findAndUpdate(query: FilterQuery<UserDocument>, update: UpdateQuery<UserDocument>, options: QueryOptions) {
-  console.log(query)
-    return User.findOneAndUpdate(query, update, options);
+  return User.findOneAndUpdate(query, update, options);
 }
 
 export function deleteUser(query: FilterQuery<UserDocument>) {
-    return User.deleteOne(query);
+  return User.deleteOne(query);
 }

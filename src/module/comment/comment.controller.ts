@@ -5,12 +5,11 @@ import {
   findComment,
   findAndUpdate,
   deleteComment,
-} from "./commet.service";
+} from "./comment.service";
 
 import { findTicket, findAndUpdate as findAndUpdateTicket } from '../ticket/ticket.service'
-/***
- * create comment
- */
+
+// Create Comment
 export const create = (async (req: Request, res: Response) => {
   const userId = get(req, "user._id");
 
@@ -23,26 +22,29 @@ export const create = (async (req: Request, res: Response) => {
   if (!ticket) {
     return res.status(404).json({ message: 'Ticket Not Found' });
   }
+
+  //prevent customer from commenting on a pending ticket
   if (String(user.role) == 'customer' && ticket.status == 'pending') {
     return res.status(403).json({ message: 'Ticket Still Pending' });
-    //prevent customer from commenting on a pending ticket
   }
+
+  //set agent in chare of a ticket
   if (!(String(user.role) == 'customer') && ticket.ticketComments.length < 1) {
     await findAndUpdateTicket({ _id: ticketId }, { agent: userId, status: 'open' }, { new: true });
-    //set agent in chare of a ticket
   }
+
+  //prevent everyone  from commenting on a closed ticket
   if (ticket.status == 'close') {
     return res.status(403).json({ message: 'Ticket Already Closed' });
-    //prevent everyone  from commenting on a closed ticket
   }
+
   const body = req.body;
   const comment = await createComment({ ...body, user: userId, ticket: ticketId });
 
   return res.status(201).json({ data: comment });
 });
-/**
- * update comment
- */
+
+//  Update Comment
 export const update = (async (req: Request, res: Response) => {
   const userId = get(req, "user._id");
   const _id = get(req, "params.commentId");
@@ -63,6 +65,7 @@ export const update = (async (req: Request, res: Response) => {
   return res.send(updatedComment);
 })
 
+// Get Comment
 export const getComment = (async (req: Request, res: Response) => {
 
   const _id = get(req, "params.commentId");
@@ -75,9 +78,8 @@ export const getComment = (async (req: Request, res: Response) => {
 
   return res.send(comment);
 })
-/**
- * commentDelete
- */
+
+// Delete Comment
 export const commentDelete = (async (req: Request, res: Response) => {
 
   const userId = get(req, "user._id");

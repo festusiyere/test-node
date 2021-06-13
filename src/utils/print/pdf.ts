@@ -1,5 +1,5 @@
 const PDFGenerator = require('pdfkit');
-import { Express, Request, Response } from "express";
+import {   Response } from "express";
 import { TicketDocument } from "../../module/ticket/ticket.model";
 const fs = require('fs');
 

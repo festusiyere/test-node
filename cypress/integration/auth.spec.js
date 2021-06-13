@@ -44,7 +44,7 @@ describe('Registration : ', () => {
             expect(response.status).to.eq(422);
         });
     });
-    it('Should return 422 unatched password', () => {
+    it('Should return 422 unmatched password', () => {
         let body = {
             name: 'User',
             email: email,
@@ -60,7 +60,7 @@ describe('Registration : ', () => {
             expect(response.status).to.eq(422);
         });
     });
-    it('Should return 201 on succesful registration', () => {
+    it('Should return 201 on successful registration', () => {
         let body = {
             name: 'User',
             email: email,
@@ -107,7 +107,7 @@ describe('Login : ', () => {
         });
     });
 
-    it('Should return 200 on succesful login', () => {
+    it('Should return 200 on successful login', () => {
         let body = {
             name: 'User',
             email: email,
@@ -186,7 +186,7 @@ describe('Forget Password: ', () => {
             expect(response.status).to.eq(422);
         });
     });
-    it('Should return 200 on reset on a forgottten password', () => {
+    it('Should return 200 on reset on a forgotten password', () => {
         let body = {
             name: 'User',
             email: email,

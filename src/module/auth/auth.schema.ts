@@ -1,6 +1,6 @@
 import { object, string, ref } from 'yup';
 
-/**registration validator */
+// Validation rules for registration
 export const register = object({
     body: object({
         name: string().required('Name is required'),
@@ -13,7 +13,7 @@ export const register = object({
     })
 });
 
-/**login validator */
+// Validation rules for login
 export const login = object({
     body: object({
         password: string()
@@ -25,14 +25,14 @@ export const login = object({
     })
 });
 
-/**forget password validator */
+// Validation rules for forgot password
 export const forgetPassword = object({
     body: object({
         email: string().email('Must be a valid email').required('Email is required')
     })
 });
 
-/**rest password validdator */
+// Validation rules for reset password
 export const resetPassword = object({
     body: object({
         password: string()

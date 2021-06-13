@@ -134,7 +134,7 @@ describe('POST | Ticket  : ', () => {
     /**
      *
      */
-    it('Should return 200 Admin delete a ticekt', () => {
+    it('Should return 200 Admin delete a ticket', () => {
         cy.authLogin(customer).then((customerRes) => {
             cy.request({
                 method: 'POST',

@@ -5,15 +5,15 @@ import * as commentController from './comment.controller';
 
 
 const router = express.Router({ mergeParams: true });
-//get ticket commet
 
+//Get Ticket Comment
 router.route('/').get(commentController.getComment)
-//comment on  a ticket
 
-router.route('/').post(validateRequest(commentSchema.create),commentController.create);
-//create comment
+//Create Comment
+router.route('/').post(validateRequest(commentSchema.create), commentController.create);
 
-router.route('/:commentId').delete(hasRole('admin') , commentController.commentDelete);
-//only admin can delete a comment comment
+// Delete Comment
+// NB: Only Admin can delete comment
+router.route('/:commentId').delete(hasRole('admin'), commentController.commentDelete);
 
 export default router

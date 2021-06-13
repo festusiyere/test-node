@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import config from "config";
-import { appError } from '../../utils/error';
 export interface UserDocument extends mongoose.Document {
     email: string;
     name: string;

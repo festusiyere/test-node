@@ -34,14 +34,14 @@ const TicketSchema = new mongoose.Schema(
     { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-//relationship to load all attached comment
+//Relationship to load all attached comment
 TicketSchema.virtual('ticketComments', {
     ref: 'Comment',
     foreignField: 'ticket',
     localField: '_id'
 });
 
-//relationship to get customer creating the ticket
+//Relationship to get customer creating the ticket
 TicketSchema.virtual('ticketCustomer', {
     ref: 'User',
     foreignField: '_id',

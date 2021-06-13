@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import config from "config";
-import { appError } from "./error";
 
 const privateKey = config.get("privateKey") as string;
 

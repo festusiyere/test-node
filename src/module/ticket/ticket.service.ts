@@ -47,7 +47,7 @@ export function getMonthlyTicket(month: number) {
     let sortDuration = {};
     if (month && (month < 13 || month > 1)) {
         const fullYear: number = new Date().getFullYear();
-        //check for leap
+        //Check if year is a leap year
         const isLeapYear = fullYear % 400 === 0 || (fullYear % 100 !== 0 && fullYear % 4 === 0);
         const months: { [key: number]: number } = {
             1: 31,

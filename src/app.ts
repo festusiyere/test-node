@@ -5,11 +5,11 @@ import mongoSanitize from "express-mongo-sanitize";
 import log from "./logger"; 
 import connect from "./db/connect";
 import routes from "./routes";
-import {globalError, appError , } from '../src/utils/error';
+import {globalError, AppError , } from '../src/utils/error';
 import * as rateLimiter from  '../src/middleware/rateLimiter';
 const app = express();
 
-//set access token from refres token
+//set access token from refresh token
 
 
 //Body parser, reading data from body to req.body
@@ -33,7 +33,7 @@ app.use('/api/v1', rateLimiter.app , routes );
 
 //undefined routes
 app.all("*", (req, res, next) => {
-    next(new appError(`Can't find ${req.originalUrl} on server !` , 404));
+    next(new AppError(`Can't find ${req.originalUrl} on server !` , 404));
   });
 app.use(globalError);
 //Global Error Handler
