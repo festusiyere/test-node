@@ -1,7 +1,7 @@
 module.exports = {
-    // preset: 'ts-jest',
-    testEnvironment: 'node',
-    moduleNameMapper: {
-      "@exmpl/(.*)": "<rootDir>/test"
+    preset: 'ts-jest',
+    transform: {
+      "^.+\\.jsx?$": "babel-jest"
     },
+    testEnvironment: 'node',
   };

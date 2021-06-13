@@ -7,8 +7,8 @@ export default class PDF {
     ticket: Array<TicketDocument>;
     res: Response;
     constructor(res: Response, ticket: Array<TicketDocument>) {
-        this.ticket = ticket;
         this.res = res;
+        this.ticket = ticket;
     }
 
     generateTable(doc: any) {
