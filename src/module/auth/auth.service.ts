@@ -2,7 +2,7 @@ import { DocumentDefinition, FilterQuery, UpdateQuery, LeanDocument } from 'mong
 import { sign, decode } from '../../utils/jwt.utils';
 import User, { UserDocument } from './auth.model';
 import Session, { SessionDocument } from './session.model';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import config from 'config';
 
 export async function registerHandler(input: DocumentDefinition<UserDocument>) {
@@ -26,7 +26,7 @@ export async function validatePassword({ email, password }: { email: UserDocumen
     // compare password
     if (!isValid) return false;
     //return user
-    return user;
+    return omit(user.toJSON(), "password");;
 }
 
 export async function validateEmail({ email }: { email: UserDocument['email'] }) {
@@ -76,7 +76,11 @@ export function createAccessToken({
     session: Omit<SessionDocument, 'password'> | LeanDocument<Omit<SessionDocument, 'password'>>;
 }) {
     // Build and return the new access token
-    const accessToken = sign(
+    // const accessToken = sign(
+    //     { ...user, session: session._id },
+    //     { expiresIn: config.get('accessTokenTtl') } // 15 minutes
+    // );
+  const accessToken = sign(
         { ...user, session: session._id },
         { expiresIn: config.get('accessTokenTtl') } // 15 minutes
     );

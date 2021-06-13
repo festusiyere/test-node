@@ -2,6 +2,8 @@ let baseUrl = 'http://localhost:1337/api/v1/user';
 
 let registrationUrl = `${baseUrl}/register`;
 
+let seedUsedUrl = `${baseUrl}/seed-staff`;
+
 let loginUrl = `${baseUrl}/login`;
 
 let logoutUrl = `${baseUrl}/logout`;
@@ -40,11 +42,19 @@ let resetPasswordUrl = `${baseUrl}/reset-password`;
 Cypress.Commands.add('authLogin', (body) => {
         cy.request({
             method: 'POST',
-            url: registrationUrl,
+            headers: {
+                'Accept': 'application/json',
+                'Content-type' : 'application/json'
+              },
+            url: seedUsedUrl,
             body
         }).then((resp1) => {
             cy.request({
                 method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-type' : 'application/json'
+                  },
                 url: loginUrl,
                 body,
                 failOnStatusCode: false
@@ -54,3 +64,26 @@ Cypress.Commands.add('authLogin', (body) => {
     
     });
 });
+
+
+Cypress.Commands.overwrite('request', (originalFn, ...args) => {
+    const defaults = {
+      headers: {
+        'Accept': 'application/json',
+        'Content-type' : 'application/json'
+      }
+    };
+  
+    let options = {};
+    if (typeof args[0] === 'object' && args[0] !== null) {
+      options = args[0];
+    } else if (args.length === 1) {
+      [options.url] = args;
+    } else if (args.length === 2) {
+      [options.method, options.url] = args;
+    } else if (args.length === 3) {
+      [options.method, options.url, options.body] = args;
+    }
+  
+    return originalFn({...defaults, ...options, ...{headers: {...defaults.headers, ...options.headers}}});
+  });

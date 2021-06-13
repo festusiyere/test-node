@@ -19,7 +19,7 @@ export const register = asyncError(async (req: Request, res: Response, next: Nex
     //check for email uniqueness
     const user = await registerHandler(req.body);
     //send user detail
-    return res.status(201).json({ message: omit(user.toJSON(), 'password') });
+    return res.status(201).json({ data: omit(user.toJSON(), 'password') });
 });
 /**
  * Login Controller

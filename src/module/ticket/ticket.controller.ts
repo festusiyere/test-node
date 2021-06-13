@@ -12,7 +12,7 @@ export const create = asyncError(async (req: Request, res: Response) => {
     const userId = get(req, 'user._id');
     const body = req.body;
     const ticket = await createTicket({ ...body, user: userId });
-    return res.status(200).json({message : ticket});
+    return res.status(201).json({ data: ticket });
 });
 /**
  *  Get All Ticket
@@ -24,15 +24,23 @@ export const getAllTicket = asyncError(async (req: Request, res: Response) => {
     //
     const _id = get(req, 'params.ticketId');
 
-    const ticket = await findTicket({ _id });
+    let ticket;
+
+    if (user.role === 'customer') {
+
+        ticket = await findTicket({ customer: userId });
+
+    }else{
+
+        ticket = await findTicket({});
+
+    }
 
     if (!ticket) return res.status(404).json({ message: 'No Record found' });
 
     //check to ensure customer an only view ticket they created
-    if (user.role === 'customer' && String(ticket.customer) !== userId) {
-        return res.sendStatus(401);
-    }
-    return res.status(200).json({data : ticket});
+
+    return res.status(200).json({ data: ticket });
 });
 /**
  *  Get Update
@@ -52,28 +60,36 @@ export const update = asyncError(async (req: Request, res: Response) => {
 
     const updatedTicket = await findAndUpdate({ _id }, update, { new: true });
 
-    return res.status(200).json({data : updatedTicket});
+    return res.status(200).json({ data: updatedTicket });
 });
 /**
  *  Get Ticket
  */
 export const getTicket = asyncError(async (req: Request, res: Response) => {
+    const user = get(req, 'user');
+
+    const userId = get(req, 'user._id');
+
     const ticketId = get(req, 'params.ticketId');
 
-    const ticket = await findTicket({ _id : ticketId });
+    const ticket = await findTicket({ _id: ticketId });
 
     if (!ticket) {
         return res.status(404).json({ message: 'No Record found' });
     }
+    //check to ensure customer an only view ticket they created
+    if (user.role === 'customer' && String(ticket.customer) !== userId) {
+        return res.sendStatus(401);
+    }
 
-    return res.status(200).json({data : ticket});
+    return res.status(200).json({ data: ticket });
 });
 /**
  *  Delete
  */
 export const ticketDelete = asyncError(async (req: Request, res: Response) => {
-    console.log('xxx');
     const userId = get(req, 'user._id');
+
     const _id = get(req, 'params.ticketId');
 
     const ticket = await findTicket({ _id });
